@@ -21,7 +21,7 @@ struct HomeView: View {
                     HStack {
                         TextField("Search Amazon", text: $searchText)
                             .padding(10)
-                            .background(Color.gray.opacity(0.2))
+                            .background(Color.white.opacity(0.9))
                             .cornerRadius(8)
                         
                         Button(action: {
@@ -33,6 +33,9 @@ struct HomeView: View {
                                 .background(Color.orange)
                                 .cornerRadius(8)
                         }
+                        Image(systemName: "qrcode.viewfinder")
+                            .resizable()
+                            .frame(width: 35, height: 35)
                     }
                     .padding(.horizontal)
                     
@@ -43,7 +46,7 @@ struct HomeView: View {
                             CategoriesView()
                             
                             // Banner Section
-                            Image("amazon_banner") // Replace with your banner image in Assets
+                            Image("amazon_banner")
                                 .resizable()
                                 .scaledToFit()
                                 .cornerRadius(10)
@@ -96,7 +99,7 @@ struct HomeView_Previews: PreviewProvider {
 struct BackgroundView: View {
     var body: some View {
         LinearGradient(
-            gradient: Gradient(colors: [Color.orange.opacity(0.6), Color.orange.opacity(0.3)]),
+            gradient: Gradient(colors: [Color.homeBgDark, Color.homeBgLight]),
             startPoint: .top,
             endPoint: .bottom
         )

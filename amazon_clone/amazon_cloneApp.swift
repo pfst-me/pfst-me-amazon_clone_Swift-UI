@@ -11,7 +11,11 @@ import SwiftUI
 struct amazon_cloneApp: App {
     var body: some Scene {
         WindowGroup {
-            HomeView()
+            TabBar()
         }
     }
+}
+
+#Preview {
+    TabBar()
 }
