@@ -10,6 +10,7 @@ import SwiftUI
 struct HomeView: View {
     @State private var searchText: String = ""
     @Environment(\.colorScheme) var colorScheme
+    @StateObject private var productViewModel = ProductViewModel()
     
     var body: some View {
         NavigationView {
@@ -61,7 +62,7 @@ struct HomeView: View {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 16) {
                                     ForEach(1...5, id: \.self) { index in
-                                        ProductCard(imageName: "product\(index)", title: "Deal \(index)")
+                                        ProductCard(imageUrl: "product\(index)", title: "Deal \(index)")
                                     }
                                 }
                                 .padding(.horizontal)
@@ -73,17 +74,25 @@ struct HomeView: View {
                                 .padding(.leading, 16)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             
-                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-                                ForEach(1...10, id: \.self) { index in
-                                    ProductCard(imageName: "product\(index)", title: "Product \(index)")
-                                }
+                            if productViewModel.products.isEmpty {
+                                ProgressView("Loading products...")
                             }
-                            .padding(.horizontal)
+                            else {
+                                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+                                    ForEach(productViewModel.products, id: \.id) { product in
+                                        ProductCard(imageUrl: product.imageUrl, title: product.name)
+                                    }
+                                }
+                                .padding(.horizontal)
+                            }
                         }
                     }
                 }
                 .navigationTitle("Amazon")
                 .navigationBarHidden(true)
+                .task {
+                    await productViewModel.fetchProducts()
+                }
             }
         }
     }
