@@ -5,42 +5,54 @@
 //  Created by pavan naik on 01/02/25.
 //
 
-import SwiftUI
+import Foundation
 
 class ProductViewModel: ObservableObject {
     @Published var products: [Product] = []
+    @Published var isLoading: Bool = false
     
-    func fetchProducts() async {
-        guard let url = URL(string: "http://localhost:8001/api/v1/products/getProducts") else {
-            print("Invalid URL")
+    private var currentPage = 1
+    private let limit = 4
+    
+    // Fetch products with pagination
+    func fetchProducts(page: Int = 1, limit: Int = 4) async {
+        guard let url = URL(string: "http://localhost:8001/api/v1/products/getProducts?page=\(page)&limit=\(limit)") else {
             return
         }
         
+        isLoading = true
+        
         do {
-            let (data, response) = try await URLSession.shared.data(from: url)
+            let (data, _) = try await URLSession.shared.data(from: url)
             
-            // Debugging: Check the raw response data
-            if let rawString = String(data: data, encoding: .utf8) {
-                print("Raw response data: \(rawString)")
-            }
+            // Decode the response using ProductResponse which contains the 'data' key
+            let productResponse = try JSONDecoder().decode(ProductResponse.self, from: data)
             
-            // Check the response status code
-            if let httpResponse = response as? HTTPURLResponse {
-                print("Response Status Code: \(httpResponse.statusCode)")
-            }
-
-            // Decode the products
-            let decodedProducts = try JSONDecoder().decode([Product].self, from: data)
-            
-            // Update the products array
             DispatchQueue.main.async {
-                self.products = decodedProducts
+                if page == 1 {
+                    self.products = productResponse.data  // For first page, replace the list
+                } else {
+                    self.products.append(contentsOf: productResponse.data)  // Append new products on subsequent pages
+                }
+                self.isLoading = false
             }
         } catch {
-            print("Error fetching products: \(error.localizedDescription)")
+            print("Error fetching products: \(error)")
+            DispatchQueue.main.async {
+                self.isLoading = false
+            }
+        }
+    }
+    
+    // Load more products when user reaches the bottom
+    func loadMoreProducts() {
+        currentPage += 1
+        Task {
+            await fetchProducts(page: currentPage, limit: limit)
         }
     }
 }
+
 
 
 //

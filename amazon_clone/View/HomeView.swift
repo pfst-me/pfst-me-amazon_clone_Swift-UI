@@ -84,6 +84,21 @@ struct HomeView: View {
                                     }
                                 }
                                 .padding(.horizontal)
+                                if productViewModel.isLoading {
+                                    ProgressView("Loading more products...")
+                                        .padding()
+                                }
+                                
+                                VStack {
+                                    GeometryReader { geometry in
+                                        Color.clear.onAppear {
+                                            if geometry.frame(in: .global).maxY < UIScreen.main.bounds.height {
+                                                productViewModel.loadMoreProducts()
+                                            }
+                                        }
+                                    }
+                                    .frame(height: 1)  // Invisible view to trigger load more on scroll
+                                }
                             }
                         }
                     }
@@ -91,7 +106,7 @@ struct HomeView: View {
                 .navigationTitle("Amazon")
                 .navigationBarHidden(true)
                 .task {
-                    await productViewModel.fetchProducts()
+                    await productViewModel.fetchProducts(page: 1, limit: 6)
                 }
             }
         }
